@@ -53,6 +53,7 @@ def process_event(state, event, pico):
 
 
 def update(state, dt):
+    old_x, old_y = state.x, state.y
     dx = int("right" in state.pressed) - int("left" in state.pressed)
     dy = int("up" in state.pressed) - int("down" in state.pressed)
     length = hypot(dx, dy)
@@ -63,7 +64,7 @@ def update(state, dt):
     state.x = max(SPRITE_SIZE / 2, min(CANVAS_WIDTH - SPRITE_SIZE / 2, state.x))
     state.y += dy * MOVE_SPEED * dt
     state.y = max(SPRITE_SIZE / 2, min(CANVAS_HEIGHT - SPRITE_SIZE / 2, state.y))
-    state.moving = bool(dx or dy)
+    state.moving = (state.x != old_x or state.y != old_y)
     state.frame_elapsed += dt
     while state.frame_elapsed >= FRAME_INTERVAL:
         state.frame = (state.frame + 1) % FRAME_COUNT
