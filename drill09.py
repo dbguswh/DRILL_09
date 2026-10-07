@@ -1,7 +1,7 @@
 """Drill #9: 방향키로 움직이는 소년."""
 
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 CANVAS_WIDTH = 1280
@@ -15,13 +15,22 @@ class GameState:
     x: float = CANVAS_WIDTH / 2
     y: float = CANVAS_HEIGHT / 2
     running: bool = True
+    pressed: set[str] = field(default_factory=set)
 
 
 def process_event(state, event, pico):
+    arrow_keys = {
+        pico.SDLK_LEFT: "left",
+        pico.SDLK_RIGHT: "right",
+        pico.SDLK_UP: "up",
+        pico.SDLK_DOWN: "down",
+    }
     if event.type == pico.SDL_QUIT:
         state.running = False
     elif event.type == pico.SDL_KEYDOWN and event.key == pico.SDLK_ESCAPE:
         state.running = False
+    elif event.type == pico.SDL_KEYDOWN and event.key in arrow_keys:
+        state.pressed.add(arrow_keys[event.key])
 
 
 def main():
