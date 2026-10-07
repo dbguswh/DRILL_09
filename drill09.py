@@ -60,6 +60,7 @@ def update(state, dt):
         dx /= length
         dy /= length
     state.x += dx * MOVE_SPEED * dt
+    state.x = max(SPRITE_SIZE / 2, min(CANVAS_WIDTH - SPRITE_SIZE / 2, state.x))
     state.y += dy * MOVE_SPEED * dt
     state.moving = bool(dx or dy)
     state.frame_elapsed += dt
