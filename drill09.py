@@ -9,6 +9,12 @@ CANVAS_HEIGHT = 1024
 ASSET_DIR = Path(__file__).resolve().parent
 SPRITE_SIZE = 100
 MOVE_STEP = 5
+SPRITE_ROWS = {
+    ("left", True): 0,
+    ("right", True): 1,
+    ("left", False): 2,
+    ("right", False): 3,
+}
 
 
 @dataclass
@@ -18,6 +24,7 @@ class GameState:
     running: bool = True
     pressed: set[str] = field(default_factory=set)
     facing: str = "right"
+    moving: bool = False
 
 
 def process_event(state, event, pico):
@@ -45,6 +52,7 @@ def update(state):
     dy = int("up" in state.pressed) - int("down" in state.pressed)
     state.x += dx * MOVE_STEP
     state.y += dy * MOVE_STEP
+    state.moving = bool(dx or dy)
 
 
 def main():
@@ -64,7 +72,8 @@ def main():
             update(state)
             pico.clear_canvas()
             background.draw(CANVAS_WIDTH // 2, CANVAS_HEIGHT // 2)
-            character.clip_draw(0, 300, SPRITE_SIZE, SPRITE_SIZE, state.x, state.y)
+            row = SPRITE_ROWS[(state.facing, state.moving)]
+            character.clip_draw(0, row * SPRITE_SIZE, SPRITE_SIZE, SPRITE_SIZE, state.x, state.y)
             pico.update_canvas()
             pico.delay(1 / 60)
     finally:
