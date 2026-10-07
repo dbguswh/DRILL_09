@@ -1,7 +1,9 @@
 """Drill #9 입력과 이동 상태를 확인한다."""
 
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 from math import hypot
 
 from drill09 import (
@@ -10,6 +12,7 @@ from drill09 import (
     MOVE_SPEED,
     SPRITE_SIZE,
     GameState,
+    main,
     process_event,
     update,
 )
@@ -87,6 +90,47 @@ class MovementTests(unittest.TestCase):
         update(state, 0.01)
         self.assertEqual(state.frame, 0)
         self.assertFalse(state.moving)
+
+
+class MainLoopTests(unittest.TestCase):
+    def test_background_and_idle_sprite_are_drawn_from_project_assets(self):
+        calls = []
+        pico = SimpleNamespace(**vars(PICO))
+
+        class Image:
+            def __init__(self, name):
+                self.name = name
+
+            def draw(self, *args):
+                calls.append((self.name, "draw", args))
+
+            def clip_draw(self, *args):
+                calls.append((self.name, "clip_draw", args))
+
+        def load_image(path):
+            self.assertTrue(Path(path).is_file())
+            return Image(Path(path).name)
+
+        events = iter([[], [SimpleNamespace(type=PICO.SDL_QUIT)]])
+        pico.open_canvas = lambda *args: calls.append(("open", args))
+        pico.close_canvas = lambda: calls.append(("close",))
+        pico.load_image = load_image
+        pico.get_events = lambda: next(events)
+        pico.get_time = lambda: 0.0
+        pico.clear_canvas = lambda: None
+        pico.update_canvas = lambda: None
+        pico.delay = lambda seconds: None
+
+        with patch.dict("sys.modules", {"pico2d": pico}):
+            main()
+
+        self.assertIn(("open", (CANVAS_WIDTH, CANVAS_HEIGHT)), calls)
+        self.assertIn(("TUK_GROUND.png", "draw", (640, 512)), calls)
+        self.assertIn(
+            ("animation_sheet.png", "clip_draw", (0, 300, 100, 100, 640.0, 512.0)),
+            calls,
+        )
+        self.assertEqual(calls[-1], ("close",))
 
 
 if __name__ == "__main__":
