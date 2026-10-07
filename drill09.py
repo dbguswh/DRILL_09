@@ -8,6 +8,7 @@ CANVAS_WIDTH = 1280
 CANVAS_HEIGHT = 1024
 ASSET_DIR = Path(__file__).resolve().parent
 SPRITE_SIZE = 100
+MOVE_STEP = 5
 
 
 @dataclass
@@ -35,6 +36,11 @@ def process_event(state, event, pico):
         state.pressed.discard(arrow_keys[event.key])
 
 
+def update(state):
+    dx = int("right" in state.pressed) - int("left" in state.pressed)
+    state.x += dx * MOVE_STEP
+
+
 def main():
     import pico2d as pico
 
@@ -49,6 +55,7 @@ def main():
             if not state.running:
                 break
 
+            update(state)
             pico.clear_canvas()
             background.draw(CANVAS_WIDTH // 2, CANVAS_HEIGHT // 2)
             character.clip_draw(0, 300, SPRITE_SIZE, SPRITE_SIZE, state.x, state.y)
