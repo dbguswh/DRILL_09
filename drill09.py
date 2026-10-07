@@ -11,7 +11,7 @@ ASSET_DIR = Path(__file__).resolve().parent
 SPRITE_SIZE = 100
 FRAME_COUNT = 8
 FRAME_INTERVAL = 0.1
-MOVE_STEP = 5
+MOVE_SPEED = 300
 SPRITE_ROWS = {
     ("left", True): 0,
     ("right", True): 1,
@@ -52,18 +52,18 @@ def process_event(state, event, pico):
         state.pressed.discard(arrow_keys[event.key])
 
 
-def update(state):
+def update(state, dt):
     dx = int("right" in state.pressed) - int("left" in state.pressed)
     dy = int("up" in state.pressed) - int("down" in state.pressed)
     length = hypot(dx, dy)
     if length:
         dx /= length
         dy /= length
-    state.x += dx * MOVE_STEP
-    state.y += dy * MOVE_STEP
+    state.x += dx * MOVE_SPEED * dt
+    state.y += dy * MOVE_SPEED * dt
     state.moving = bool(dx or dy)
-    state.frame_elapsed += 1 / 60
-    if state.frame_elapsed >= FRAME_INTERVAL:
+    state.frame_elapsed += dt
+    while state.frame_elapsed >= FRAME_INTERVAL:
         state.frame = (state.frame + 1) % FRAME_COUNT
         state.frame_elapsed -= FRAME_INTERVAL
 
@@ -76,13 +76,16 @@ def main():
         state = GameState()
         background = pico.load_image(str(ASSET_DIR / "TUK_GROUND.png"))
         character = pico.load_image(str(ASSET_DIR / "animation_sheet.png"))
+        last_time = pico.get_time()
         while state.running:
             for event in pico.get_events():
                 process_event(state, event, pico)
             if not state.running:
                 break
 
-            update(state)
+            now = pico.get_time()
+            update(state, now - last_time)
+            last_time = now
             pico.clear_canvas()
             background.draw(CANVAS_WIDTH // 2, CANVAS_HEIGHT // 2)
             row = SPRITE_ROWS[(state.facing, state.moving)]
