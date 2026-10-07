@@ -20,6 +20,8 @@ class GameState:
 def process_event(state, event, pico):
     if event.type == pico.SDL_QUIT:
         state.running = False
+    elif event.type == pico.SDL_KEYDOWN and event.key == pico.SDLK_ESCAPE:
+        state.running = False
 
 
 def main():
