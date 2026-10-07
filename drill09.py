@@ -38,7 +38,9 @@ def process_event(state, event, pico):
 
 def update(state):
     dx = int("right" in state.pressed) - int("left" in state.pressed)
+    dy = int("up" in state.pressed) - int("down" in state.pressed)
     state.x += dx * MOVE_STEP
+    state.y += dy * MOVE_STEP
 
 
 def main():
