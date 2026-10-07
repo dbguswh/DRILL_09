@@ -17,6 +17,7 @@ class GameState:
     y: float = CANVAS_HEIGHT / 2
     running: bool = True
     pressed: set[str] = field(default_factory=set)
+    facing: str = "right"
 
 
 def process_event(state, event, pico):
@@ -31,7 +32,10 @@ def process_event(state, event, pico):
     elif event.type == pico.SDL_KEYDOWN and event.key == pico.SDLK_ESCAPE:
         state.running = False
     elif event.type == pico.SDL_KEYDOWN and event.key in arrow_keys:
-        state.pressed.add(arrow_keys[event.key])
+        direction = arrow_keys[event.key]
+        state.pressed.add(direction)
+        if direction in ("left", "right"):
+            state.facing = direction
     elif event.type == pico.SDL_KEYUP and event.key in arrow_keys:
         state.pressed.discard(arrow_keys[event.key])
 
