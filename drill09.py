@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from dataclasses import dataclass, field
+from math import hypot
 
 
 CANVAS_WIDTH = 1280
@@ -54,6 +55,10 @@ def process_event(state, event, pico):
 def update(state):
     dx = int("right" in state.pressed) - int("left" in state.pressed)
     dy = int("up" in state.pressed) - int("down" in state.pressed)
+    length = hypot(dx, dy)
+    if length:
+        dx /= length
+        dy /= length
     state.x += dx * MOVE_STEP
     state.y += dy * MOVE_STEP
     state.moving = bool(dx or dy)
