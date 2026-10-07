@@ -31,6 +31,8 @@ def process_event(state, event, pico):
         state.running = False
     elif event.type == pico.SDL_KEYDOWN and event.key in arrow_keys:
         state.pressed.add(arrow_keys[event.key])
+    elif event.type == pico.SDL_KEYUP and event.key in arrow_keys:
+        state.pressed.discard(arrow_keys[event.key])
 
 
 def main():
